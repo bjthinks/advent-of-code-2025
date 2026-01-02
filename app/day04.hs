@@ -9,8 +9,8 @@ numRollsNear arr (x,y) = sum $ do
   let c = arr ! (x0,y0)
   return $ if c == '@' then 1 else 0
 
-numAccessible :: Array (Int,Int) Char -> Int -> Int -> Int
-numAccessible arr width height = sum $ do
+numAccessible :: Array (Int,Int) Char -> (Int,Int) -> Int
+numAccessible arr (width,height) = sum $ do
   x <- [1..width]
   y <- [1..height]
   let c = arr ! (x,y)
@@ -30,4 +30,4 @@ main = do
       -- [((1,1),'a'),((1,2),'b'),((2,1),'c'),((2,2),'d')]
       paper' = concat $ map (\(y,xs) -> map (\(x,c) -> ((y,x),c)) xs) paper
       arr = listArray ((0,0),(width+1,height+1)) (repeat '.') // paper'
-  print $ numAccessible arr width height
+  print $ numAccessible arr (width,height)
