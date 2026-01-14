@@ -22,6 +22,12 @@ name:               advent-of-code2025
 --                  | | | +--- code changes with no API change
 version:            0.1.0.0
 
+-- The license under which the package is released.
+license:            BSD-3-Clause
+
+-- The file containing the license text.
+license-file:       LICENSE
+
 -- The package author(s).
 author:             Brian Johnson
 
