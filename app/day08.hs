@@ -4,6 +4,7 @@ import qualified Control.Monad.Union as UF
 import Data.Array
 import Data.Char
 import Data.List
+import Data.Tuple.Extra
 
 type Point = (Int, Int, Int)
 
@@ -50,6 +51,28 @@ countRuns input = c 0 input
     c k [_] = [k + 1]
     c _ _ = undefined
 
+joinManyNetworks :: Array Int UF.Node -> Int -> [(Int, Int, Int)] -> UF.UnionM Int (Int, Int)
+joinManyNetworks nodeArray numWires ((_, x, y) : distances) = do
+  let node1 = nodeArray ! x
+      node2 = nodeArray ! y
+  rep1 <- snd <$> UF.lookup node1
+  rep2 <- snd <$> UF.lookup node2
+  if rep1 == rep2
+    then joinManyNetworks nodeArray numWires distances
+    else do
+    _ <- UF.merge m node1 node2
+    let wiresLeft = numWires - 1
+    if wiresLeft == 0
+      then return (x, y)
+      else joinManyNetworks nodeArray wiresLeft distances
+joinManyNetworks _ _ _ = error "All nodes joined and more to go"
+
+joinAndReportCoords :: Int -> Int -> [(Int, Int, Int)] -> UF.UnionM Int (Int, Int)
+joinAndReportCoords numNodes numWires distances = do
+  nodes <- sequence $ map UF.new [1..numNodes]
+  let nodeArray = listArray (1, numNodes) nodes
+  joinManyNetworks nodeArray numWires distances
+
 main :: IO ()
 main = do
   raw <- readFile "day08-input.txt"
@@ -61,3 +84,5 @@ main = do
                    x <- [1..numNodes], y <- [x+1..numNodes]]
       sortedDistances = sort distances
   print $ product $ take 3 $ UF.run $ joinAndReportSizes numNodes 1000 sortedDistances
+  let (p1, p2) = UF.run $ joinAndReportCoords numNodes (numNodes - 1) sortedDistances
+  print $ fst3 (points ! p1) * fst3 (points ! p2)
